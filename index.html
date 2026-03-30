@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DealDrop — Bargain Like a Pro</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#FF6B00">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="DealDrop">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&family=Noto+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --saffron: #FF6B00;
+    --turmeric: #FFC107;
+    --cream: #FFF8EE;
+    --dark: #1A0A00;
+    --leaf: #2D7A3A;
+    --rose: #E8294C;
+    --border: #FFD89B;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans', sans-serif;
+    background: var(--cream);
+    color: var(--dark);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 10% 20%, rgba(255,107,0,0.08) 0%, transparent 50%),
+      radial-gradient(circle at 90% 80%, rgba(255,193,7,0.12) 0%, transparent 50%);
+  }
+
+  header {
+    background: var(--saffron);
+    padding: 18px 20px 14px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(255,107,0,0.3);
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -30px; left: -30px; right: -30px;
+    height: 80px;
+    background: repeating-linear-gradient(
+      45deg, transparent, transparent 8px,
+      rgba(255,255,255,0.07) 8px, rgba(255,255,255,0.07) 16px
+    );
+  }
+
+  .logo {
+    font-family: 'Baloo 2', cursive;
+    font-size: 2rem;
+    font-weight: 800;
+    color: white;
+    letter-spacing: -1px;
+    position: relative;
+  }
+  .logo span { color: var(--turmeric); }
+  .tagline {
+    color: rgba(255,255,255,0.88);
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-top: 2px;
+    position: relative;
+  }
+
+  #install-banner {
+    display: none;
+    background: var(--dark);
+    color: white;
+    padding: 10px 16px;
+    text-align: center;
+    font-size: 0.82rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  #install-banner.show { display: flex; }
+  #install-btn {
+    background: var(--turmeric);
+    color: var(--dark);
+    border: none;
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .categories {
+    display: flex;
+    gap: 8px;
+    padding: 16px 16px 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .categories::-webkit-scrollbar { display: none; }
+
+  .cat-pill {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 14px;
+    border-radius: 14px;
+    border: 2px solid var(--border);
+    background: white;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    font-family: 'Noto Sans', sans-serif;
+  }
+  .cat-pill .icon { font-size: 1.4rem; }
+  .cat-pill .label { font-size: 0.68rem; font-weight: 600; color: #666; }
+  .cat-pill:hover, .cat-pill.active {
+    background: var(--saffron);
+    border-color: var(--saffron);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(255,107,0,0.25);
+  }
+  .cat-pill.active .label, .cat-pill:hover .label { color: rgba(255,255,255,0.85); }
+
+  main { padding: 12px 16px 100px; }
+
+  .section-title {
+    font-family: 'Baloo 2', cursive;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin: 12px 0 10px;
+  }
+
+  .input-card {
+    background: white;
+    border-radius: 18px;
+    padding: 18px;
+    border: 2px solid var(--border);
+    box-shadow: 0 4px 20px rgba(255,107,0,0.06);
+    margin-bottom: 16px;
+  }
+
+  .field-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--saffron);
+    margin-bottom: 6px;
+  }
+
+  input[type="text"], input[type="number"], select {
+    width: 100%;
+    border: 1.5px solid #FFE0B2;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 0.95rem;
+    font-family: 'Noto Sans', sans-serif;
+    color: var(--dark);
+    background: var(--cream);
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 12px;
+  }
+  input:focus, select:focus { border-color: var(--saffron); background: white; }
+
+  .row { display: flex; gap: 10px; }
+  .row > div { flex: 1; }
+
+  .ask-btn {
+    width: 100%;
+    background: var(--saffron);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: 'Baloo 2', cursive;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 14px rgba(255,107,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .ask-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255,107,0,0.4); }
+  .ask-btn:active { transform: translateY(0); }
+  .ask-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  .result-card {
+    background: white;
+    border-radius: 18px;
+    border: 2px solid var(--border);
+    overflow: hidden;
+    box-shadow: 0 6px 24px rgba(255,107,0,0.08);
+    display: none;
+  }
+  .result-card.visible { display: block; animation: slideUp 0.4s ease; }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-header {
+    background: linear-gradient(135deg, var(--saffron), #FF8C42);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .result-header .title {
+    font-family: 'Baloo 2', cursive;
+    font-size: 1rem;
+    font-weight: 700;
+    color: white;
+  }
+
+  .result-body { padding: 18px; }
+
+  .price-strip { display: flex; gap: 8px; margin-bottom: 16px; }
+  .price-box { flex: 1; border-radius: 12px; padding: 10px 8px; text-align: center; }
+  .price-box.open { background: #FFF3E0; border: 2px solid #FFB74D; }
+  .price-box.target { background: #E8F5E9; border: 2px solid #66BB6A; }
+  .price-box.max { background: #FDE8EC; border: 2px solid #EF9A9A; }
+  .price-box .p-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #666; margin-bottom: 4px; }
+  .price-box .p-value { font-family: 'Baloo 2', cursive; font-size: 1.2rem; font-weight: 800; color: var(--dark); }
+
+  .script-block {
+    background: #FFFBF0;
+    border: 1.5px dashed #FFD54F;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+  .script-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--saffron); margin-bottom: 8px; }
+  .script-lines { display: flex; flex-direction: column; gap: 7px; }
+  .script-line {
+    background: white;
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    border-left: 3px solid var(--turmeric);
+    color: var(--dark);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .script-line:hover { border-left-color: var(--saffron); background: #FFF8EE; transform: translateX(3px); }
+
+  .tips-list { display: flex; flex-direction: column; gap: 8px; }
+  .tip {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 10px 12px; background: #F3F9F4;
+    border-radius: 10px; font-size: 0.85rem; line-height: 1.5;
+  }
+  .tip .tip-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+
+  .loading { display: none; text-align: center; padding: 30px; }
+  .loading.visible { display: block; }
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid #FFE0B2;
+    border-top-color: var(--saffron);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-family: 'Baloo 2', cursive; font-size: 0.95rem; color: var(--saffron); }
+
+  .toast {
+    position: fixed;
+    bottom: 80px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--dark); color: white;
+    padding: 8px 18px; border-radius: 20px;
+    font-size: 0.8rem; opacity: 0;
+    transition: all 0.3s; z-index: 100;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .divider { border: none; border-top: 1.5px dashed #FFE0B2; margin: 14px 0; }
+  .section-sub { font-family: 'Baloo 2', cursive; font-size: 0.85rem; font-weight: 700; color: #888; margin-bottom: 10px; }
+
+  .red-flags { background: #FFF0F3; border: 1.5px solid #FFCDD2; border-radius: 12px; padding: 12px 14px; margin-top: 12px; }
+  .red-flag-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--rose); margin-bottom: 8px; }
+  .red-flags ul { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  .red-flags ul li { font-size: 0.83rem; color: #C62828; display: flex; gap: 6px; }
+  .red-flags ul li::before { content: "⚠️"; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">💸 Deal<span>Drop</span></div>
+  <div class="tagline">Drop the price. Every time.</div>
+</header>
+
+<div id="install-banner">
+  <span>📲 Add DealDrop to your home screen!</span>
+  <button id="install-btn" onclick="installApp()">Install App</button>
+</div>
+
+<div class="categories">
+  <div class="cat-pill active" onclick="selectCategory(this, 'auto')"><span class="icon">🛺</span><span class="label">Auto/Cab</span></div>
+  <div class="cat-pill" onclick="selectCategory(this, 'vegetables')"><span class="icon">🥦</span><span class="label">Veggies</span></div>
+  <div class="cat-pill" onclick="selectCategory(this, 'fruits')"><span class="icon">🍎</span><span class="label">Fruits</span></div>
+  <div class="cat-pill" onclick="selectCategory(this, 'clothes')"><span class="icon">👗</span><span class="label">Clothes</span></div>
+  <div class="cat-pill" onclick="selectCategory(this, 'accessories')"><span class="icon">💍</span><span class="label">Accessories</span></div>
+  <div class="cat-pill" onclick="selectCategory(this, 'electronics')"><span class="icon">📱</span><span class="label">Electronics</span></div>
+  <div class="cat-pill" onclick="selectCategory(this, 'home')"><span class="icon">🏠</span><span class="label">Home Items</span></div>
+</div>
+
+<main>
+  <div class="section-title">What are you buying? 🤔</div>
+  <div class="input-card">
+    <div id="dynamic-fields"></div>
+    <button class="ask-btn" onclick="getBargainAdvice()" id="ask-btn">
+      💸 Drop That Price
+    </button>
+  </div>
+
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <div class="loading-text">Finding your best deal...</div>
+  </div>
+
+  <div class="result-card" id="result-card">
+    <div class="result-header">
+      <span style="font-size:1.4rem">🎯</span>
+      <div>
+        <div class="title" id="result-title">Your Deal Strategy</div>
+        <div style="font-size:0.7rem;color:rgba(255,255,255,0.8)" id="result-subtitle"></div>
+      </div>
+    </div>
+    <div class="result-body">
+      <div class="price-strip">
+        <div class="price-box open"><div class="p-label">Open With</div><div class="p-value" id="price-open">—</div></div>
+        <div class="price-box target"><div class="p-label">Target</div><div class="p-value" id="price-target">—</div></div>
+        <div class="price-box max"><div class="p-label">Walk Away If</div><div class="p-value" id="price-max">—</div></div>
+      </div>
+      <hr class="divider">
+      <div class="script-block">
+        <div class="script-label">💬 Say This (tap to copy)</div>
+        <div class="script-lines" id="script-lines"></div>
+      </div>
+      <hr class="divider">
+      <div class="section-sub">💡 Pro Tips</div>
+      <div class="tips-list" id="tips-list"></div>
+      <div class="red-flags" id="red-flags" style="display:none">
+        <div class="red-flag-label">🚩 Watch Out For</div>
+        <ul id="red-flags-list"></ul>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast">Copied!</div>
+
+<script>
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('install-banner').classList.add('show');
+});
+function installApp() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => {
+      deferredPrompt = null;
+      document.getElementById('install-banner').classList.remove('show');
+    });
+  }
+}
+window.addEventListener('appinstalled', () => {
+  document.getElementById('install-banner').classList.remove('show');
+});
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+
+let currentCategory = 'auto';
+
+const categoryFields = {
+  auto: `
+    <div class="field-label">Where are you going?</div>
+    <input type="text" id="f1" placeholder="e.g. Charminar to Ameerpet" />
+    <div class="row">
+      <div><div class="field-label">Distance</div>
+        <select id="f2"><option value="short">Short (&lt;3 km)</option><option value="medium" selected>Medium (3–8 km)</option><option value="long">Long (&gt;8 km)</option></select>
+      </div>
+      <div><div class="field-label">Time of day</div>
+        <select id="f3"><option value="morning">Morning</option><option value="afternoon" selected>Afternoon</option><option value="evening">Evening</option><option value="night">Night</option></select>
+      </div>
+    </div>
+    <div class="field-label">Auto asked for (₹)</div>
+    <input type="number" id="f4" placeholder="e.g. 150" />`,
+  vegetables: `
+    <div class="field-label">What vegetable?</div>
+    <input type="text" id="f1" placeholder="e.g. tomatoes, onions" />
+    <div class="row">
+      <div><div class="field-label">Quantity</div><input type="text" id="f2" placeholder="e.g. 1 kg" /></div>
+      <div><div class="field-label">Asking price (₹)</div><input type="number" id="f4" placeholder="e.g. 60" /></div>
+    </div>
+    <div class="field-label">Where?</div>
+    <select id="f3"><option value="street vendor">Street vendor</option><option value="local market">Local market</option><option value="weekly bazaar">Weekly bazaar</option></select>`,
+  fruits: `
+    <div class="field-label">Which fruit?</div>
+    <input type="text" id="f1" placeholder="e.g. mangoes, grapes" />
+    <div class="row">
+      <div><div class="field-label">Quantity</div><input type="text" id="f2" placeholder="e.g. 1 dozen" /></div>
+      <div><div class="field-label">Asking price (₹)</div><input type="number" id="f4" placeholder="e.g. 120" /></div>
+    </div>
+    <div class="field-label">Condition</div>
+    <select id="f3"><option value="fresh and perfect">Fresh</option><option value="mostly good">Mostly good</option><option value="overripe/mixed">Overripe/mixed</option></select>`,
+  clothes: `
+    <div class="field-label">What are you buying?</div>
+    <input type="text" id="f1" placeholder="e.g. kurti, jeans, dupatta" />
+    <div class="row">
+      <div><div class="field-label">Asking price (₹)</div><input type="number" id="f4" placeholder="e.g. 800" /></div>
+      <div><div class="field-label">Shop type</div>
+        <select id="f3"><option value="street stall">Street stall</option><option value="local boutique">Local boutique</option><option value="wholesale market">Wholesale market</option></select>
+      </div>
+    </div>
+    <div class="field-label">Any details?</div>
+    <input type="text" id="f2" placeholder="e.g. no tag, buying 2 pieces" />`,
+  accessories: `
+    <div class="field-label">What are you buying?</div>
+    <input type="text" id="f1" placeholder="e.g. bangles, earrings, handbag" />
+    <div class="row">
+      <div><div class="field-label">Asking price (₹)</div><input type="number" id="f4" placeholder="e.g. 350" /></div>
+      <div><div class="field-label">Material</div>
+        <select id="f3"><option value="artificial/imitation">Artificial</option><option value="semi-precious">Semi-precious</option><option value="handmade/craft">Handmade</option></select>
+      </div>
+    </div>
+    <div class="field-label">Quantity</div>
+    <input type="text" id="f2" placeholder="e.g. just 1, set of 6" />`,
+  electronics: `
+    <div class="field-label">What are you buying?</div>
+    <input type="text" id="f1" placeholder="e.g. earphones, charger" />
+    <div class="row">
+      <div><div class="field-label">Asking price (₹)</div><input type="number" id="f4" placeholder="e.g. 1200" /></div>
+      <div><div class="field-label">Shop type</div>
+        <select id="f3"><option value="street electronics stall">Street stall</option><option value="local electronics shop">Local shop</option><option value="electronics bazaar">Electronics bazaar</option></select>
+      </div>
+    </div>
+    <div class="field-label">Brand / Condition</div>
+    <input type="text" id="f2" placeholder="e.g. local brand, no bill" />`,
+  home: `
+    <div class="field-label">What are you buying?</div>
+    <input type="text" id="f1" placeholder="e.g. bedsheet, utensils, curtains" />
+    <div class="row">
+      <div><div class="field-label">Asking price (₹)</div><input type="number" id="f4" placeholder="e.g. 550" /></div>
+      <div><div class="field-label">Shop type</div>
+        <select id="f3"><option value="street vendor">Street vendor</option><option value="local home goods store">Local store</option><option value="weekly market">Weekly market</option></select>
+      </div>
+    </div>
+    <div class="field-label">Any extras?</div>
+    <input type="text" id="f2" placeholder="e.g. buying 2, small defect" />`
+};
+
+function selectCategory(el, cat) {
+  document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  currentCategory = cat;
+  document.getElementById('dynamic-fields').innerHTML = categoryFields[cat];
+  document.getElementById('result-card').classList.remove('visible');
+  document.getElementById('loading').classList.remove('visible');
+}
+
+document.getElementById('dynamic-fields').innerHTML = categoryFields['auto'];
+
+function getFormData() {
+  return {
+    f1: document.getElementById('f1')?.value || '',
+    f2: document.getElementById('f2')?.value || '',
+    f3: document.getElementById('f3')?.value || '',
+    f4: document.getElementById('f4')?.value || ''
+  };
+}
+
+async function getBargainAdvice() {
+  const { f1, f2, f3, f4 } = getFormData();
+  if (!f1 && !f4) { alert("Please fill in at least the item and price!"); return; }
+
+  const btn = document.getElementById('ask-btn');
+  btn.disabled = true;
+  document.getElementById('result-card').classList.remove('visible');
+  document.getElementById('loading').classList.add('visible');
+
+  let prompt = '';
+  if (currentCategory === 'auto') {
+    prompt = `You are a helpful Indian street bargaining coach. A person in Hyderabad wants to negotiate an auto/cab.
+Route: "${f1}", Distance: ${f2}, Time: ${f3}, Asking: ₹${f4 || 'unknown'}
+Return ONLY JSON (no markdown):
+{"subtitle":"one line context","open_with":"₹XX","target_price":"₹XX","walk_away_if":"above ₹XX","scripts":["phrase 1","phrase 2","phrase 3"],"tips":["tip 1","tip 2","tip 3"],"red_flags":["warning 1","warning 2"]}
+Scripts should be natural desi English. Be specific with prices.`;
+  } else {
+    prompt = `You are a helpful Indian street bargaining coach. Buying: ${currentCategory}.
+Item: "${f1}", Details: "${f2}", Shop: "${f3}", Asking: ₹${f4 || 'unknown'}
+Return ONLY JSON (no markdown):
+{"subtitle":"one line context","open_with":"₹XX","target_price":"₹XX","walk_away_if":"above ₹XX","scripts":["phrase 1","phrase 2","phrase 3"],"tips":["tip 1","tip 2","tip 3"],"red_flags":["warning 1","warning 2"]}
+Scripts should be natural desi English. Be specific with prices.`;
+  }
+
+  try {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        messages: [{ role: "user", content: prompt }]
+      })
+    });
+    const data = await response.json();
+    const rawText = data.content.map(i => i.text || '').join('');
+    const clean = rawText.replace(/```json|```/g, '').trim();
+    const result = JSON.parse(clean);
+    renderResult(result);
+  } catch (err) {
+    alert("Something went wrong. Please try again!");
+  } finally {
+    btn.disabled = false;
+    document.getElementById('loading').classList.remove('visible');
+  }
+}
+
+function renderResult(r) {
+  document.getElementById('result-subtitle').textContent = r.subtitle || '';
+  document.getElementById('price-open').textContent = r.open_with || '—';
+  document.getElementById('price-target').textContent = r.target_price || '—';
+  document.getElementById('price-max').textContent = r.walk_away_if || '—';
+
+  const scriptContainer = document.getElementById('script-lines');
+  scriptContainer.innerHTML = '';
+  (r.scripts || []).forEach(line => {
+    const div = document.createElement('div');
+    div.className = 'script-line';
+    div.textContent = line;
+    div.onclick = () => copyText(line);
+    scriptContainer.appendChild(div);
+  });
+
+  const tipsContainer = document.getElementById('tips-list');
+  tipsContainer.innerHTML = '';
+  const tipIcons = ['🎯', '⏳', '🚶', '💰', '👀'];
+  (r.tips || []).forEach((tip, i) => {
+    const div = document.createElement('div');
+    div.className = 'tip';
+    div.innerHTML = `<span class="tip-icon">${tipIcons[i % tipIcons.length]}</span><span>${tip}</span>`;
+    tipsContainer.appendChild(div);
+  });
+
+  const redFlagsEl = document.getElementById('red-flags');
+  const redFlagsList = document.getElementById('red-flags-list');
+  redFlagsList.innerHTML = '';
+  if (r.red_flags && r.red_flags.length > 0) {
+    r.red_flags.forEach(flag => {
+      const li = document.createElement('li');
+      li.textContent = flag;
+      redFlagsList.appendChild(li);
+    });
+    redFlagsEl.style.display = 'block';
+  } else {
+    redFlagsEl.style.display = 'none';
+  }
+
+  document.getElementById('result-card').classList.add('visible');
+  document.getElementById('result-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 1800);
+  });
+}
+</script>
+</body>
+</html>
